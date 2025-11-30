@@ -3,26 +3,43 @@ let sidebar = document.getElementById("thesidebar");
 let moodbar = document.getElementById("themoodbar");
 let posebar = document.getElementById("theposebar");
 let systembox = document.getElementById("systembox");
-systembox.onclick = function() {
+systembox.onclick = function () {
     console.log("click SYSTEM_IMG");
-    if (sidebar.style.display == "none") {
+    if (sidebar.style.display == "none" || sidebar.classList.contains('sidebar-close')) {
+        // Open Sidebar
         sidebar.style.display = "block";
+        sidebar.classList.remove('sidebar-close');
+        sidebar.classList.add('sidebar-open');
+
+        // Hide other bars
         moodbar.style.display = "none";
         posebar.style.display = "none";
     } else {
-        sidebar.style.display = "none";
-        moodbar.style.display = "block";
-        posebar.style.display = "block";
+        // Close Sidebar with Animation
+        sidebar.classList.remove('sidebar-open');
+        sidebar.classList.add('sidebar-close');
+
+        // Wait for animation to finish before hiding
+        setTimeout(() => {
+            if (sidebar.classList.contains('sidebar-close')) {
+                sidebar.style.display = "none";
+                sidebar.classList.remove('sidebar-close');
+
+                // Show other bars
+                moodbar.style.display = "block";
+                posebar.style.display = "block";
+            }
+        }, 300); // Match animation duration
     }
     if (checkCameraPaused()) {
         playCapture();
     }
 };
 let systemtext = document.getElementById("systemtext");
-systembox.onmouseover = function() {
+systembox.onmouseover = function () {
     systemtext.style.color = "#FFFFFFFF";
 };
-systembox.onmouseout = function() {
+systembox.onmouseout = function () {
     if (sidebar.style.display == "none") {
         systemtext.style.color = "#FFFFFF00";
     }
@@ -136,7 +153,7 @@ function createBGImageLayout(group) {
         let file = item.files[0];
         if (file) {
             let reader = new FileReader();
-            reader.onloadend = function() {
+            reader.onloadend = function () {
                 setCMV("BG_UPLOAD", "url(" + reader.result + ")");
                 setBackGround();
             }
@@ -149,7 +166,7 @@ function createBGImageLayout(group) {
     let cancelitem = document.createElement("input");
     cancelitem.setAttribute("type", "button");
     cancelitem.setAttribute("value", "Remove Image");
-    cancelitem.onclick = function() {
+    cancelitem.onclick = function () {
         item.value = "";
         setCMV("BG_UPLOAD", "");
         setBackGround();
@@ -178,25 +195,25 @@ let songList = []
 
 function updateMusicList() {
     const musicList = document.getElementById("musiclist")
-    musicList.innerHTML = "" 
-    
+    musicList.innerHTML = ""
+
     songList.forEach((music, index) => {
         const listItem = document.createElement('div') //Box 
         listItem.className = "music-item"
-        listItem.style.display = "flex"  
-        listItem.style.alignItems = "center"  
-    
+        listItem.style.display = "flex"
+        listItem.style.alignItems = "center"
+
         //decode
-        const arrayBuffer = music.data 
-        const blob = new Blob([arrayBuffer], { type: 'audio/mp3' }) 
-        const url = URL.createObjectURL(blob) 
+        const arrayBuffer = music.data
+        const blob = new Blob([arrayBuffer], { type: 'audio/mp3' })
+        const url = URL.createObjectURL(blob)
 
         //assign url to new audio object
-        const audio = new Audio(url)  
-        audio.controls = true   
+        const audio = new Audio(url)
+        audio.controls = true
         audio.style.height = "28.5px"
         listItem.appendChild(audio)
-    
+
         //element
         const deleteBtn = document.createElement('button')
         deleteBtn.innerText = getL('Delete')
@@ -220,6 +237,7 @@ function updateMusicList() {
 }
 
 function createLayout() {
+    updateTheme();
     setBackGround();
 
     // vrm loading button
@@ -231,7 +249,7 @@ function createLayout() {
     vrmbtn.setAttribute("type", "file");
     vrmbtn.setAttribute("accept", ".vrm");
     vrmbtn.style.display = "none";
-    vrmbtn.onchange = function() {
+    vrmbtn.onchange = function () {
         if ('files' in vrmbtn && vrmbtn.files.length > 0) {
             let files = vrmbtn.files;
             let file = files[0];
@@ -250,7 +268,7 @@ function createLayout() {
     vrmbtnkey.className = "confkey";
     vrmbtnkey.id = "vrmbtnkey";
     vrmbtnkey.innerHTML = "ᐅ " + getL("Upload VRM Model");
-    vrmbtnkey.onclick = function() {
+    vrmbtnkey.onclick = function () {
         vrmbtn.click();
     }
     vrmbox.appendChild(vrmbtnkey);
@@ -263,7 +281,7 @@ function createLayout() {
     vrmurlbox.className = "w3-hide";
     vrmurlbox.id = "vrmurlbox";
     vrmurlbox.style.color = "white";
-    vrmurlkey.onclick = function() {
+    vrmurlkey.onclick = function () {
         if (vrmurlbox.className == "w3-hide") {
             vrmurlkey.innerHTML = "ᐁ " + getL("Set VRM URL");
             vrmurlbox.className = "";
@@ -280,7 +298,7 @@ function createLayout() {
     let vrmurlsubmit = document.createElement("input");
     vrmurlsubmit.setAttribute("type", "button");
     vrmurlsubmit.setAttribute("value", getL("Set URL"));
-    vrmurlsubmit.onclick = function() {
+    vrmurlsubmit.onclick = function () {
         loadVRM(vrmurlinput.value);
         setCMV("MODEL", vrmurlinput.value);
         setCMV("CUSTOM_MODEL", true);
@@ -291,7 +309,7 @@ function createLayout() {
     let videoctlbtn = document.getElementById("videoctlbutton");
     videoctlbtn.innerHTML = getL("Video Control");
     let videoselect = document.getElementById("videoselect");
-    videoselect.onchange = function() {
+    videoselect.onchange = function () {
         console.log("set camera: ", videoselect.value);
         setVideoStream(videoselect.value);
     }
@@ -327,13 +345,13 @@ function createLayout() {
     effectbox.innerHTML = "";
     //all effects
     let alleffects = getAllEffects();
-    Object.keys(alleffects).forEach(function(key) {
+    Object.keys(alleffects).forEach(function (key) {
         let effectkey = document.createElement('div');
         effectkey.className = "effectkey";
         effectkey.id = "effectkey_" + key;
         effectkey.innerHTML = "ᐅ " + getL(key);
-        effectkey.onclick = function() {
-            Object.keys(alleffects).forEach(function(otherkey) {
+        effectkey.onclick = function () {
+            Object.keys(alleffects).forEach(function (otherkey) {
                 let tmpkey = document.getElementById("effectkey_" + otherkey);
                 let tmpgroup = document.getElementById("effectgroup_" + otherkey);
                 if (otherkey == key && tmpgroup.className == "w3-margin w3-hide") {
@@ -378,12 +396,12 @@ function createLayout() {
                 itemcheck.id = effectitem['key'] + "_box";
                 itemcheck.setAttribute("type", "checkbox");
                 itemcheck.checked = false;
-                itemcheck.onclick = function() {
+                itemcheck.onclick = function () {
                     if (itemcheck.checked) {
                         effectitem['enableEffect']();
                         itemdiv.style.display = "block";
                     } else {
-                        effectitem['disableEffect']();  
+                        effectitem['disableEffect']();
                         itemdiv.style.display = "none";
                     }
                 }
@@ -392,7 +410,7 @@ function createLayout() {
                 itemdiv.style.display = "none";
                 effectgroup.appendChild(itemdiv);
                 if (effectitem['parameters']) {
-                    Object.keys(effectitem['parameters']).forEach(function(parameter) {
+                    Object.keys(effectitem['parameters']).forEach(function (parameter) {
                         let partext = document.createElement('text');
                         partext.className = "w3-tooltip";
                         partext.style.color = "#fff";
@@ -403,7 +421,7 @@ function createLayout() {
                             let parColor = document.createElement('input');
                             parColor.setAttribute("type", "color");
                             parColor.setAttribute("value", effectitem['parameters'][parameter]);
-                            parColor.onchange = function() {
+                            parColor.onchange = function () {
                                 console.log(parameter, parColor.value);
                                 effectitem['parameters'][parameter] = parColor.value;
                             };
@@ -418,7 +436,7 @@ function createLayout() {
                             let setrange = parArr[2] - parArr[1];
                             let setvalue = (parArr[0] - parArr[1]) * 1000 / setrange;
                             parrange.setAttribute("value", setvalue);
-                            parrange.onchange = function() {
+                            parrange.onchange = function () {
                                 let newvalue = Math.floor(parrange.value / 1000 * setrange + parArr[1]);
                                 parval.value = newvalue;
                                 parval.onchange();
@@ -428,11 +446,11 @@ function createLayout() {
                             parval.style.textAlign = "right";
                             parval.style.width = "100px";
                             parval.value = parArr[0];
-                            parval.onchange = function() {
+                            parval.onchange = function () {
                                 console.log(parameter, parval.value);
                                 if (parval.value < parArr[1]) {
                                     parval.value = parArr[1];
-                                } else if (parval.value < parArr[2]) {} else {
+                                } else if (parval.value < parArr[2]) { } else {
                                     parval.value = parArr[2];
                                 }
                                 let newvalue = Math.floor((parval.value - parArr[1]) * 1000 / setrange);
@@ -451,49 +469,49 @@ function createLayout() {
     //music
     let songCounter = 0;
     let musicboxbtn = document.getElementById("musicboxbutton")
-    musicboxbtn.innerHTML = getL("Music"); 
-    let musicbox = document.getElementById("musicbox") 
-    musicbox.innerHTML = ""   
+    musicboxbtn.innerHTML = getL("Music");
+    let musicbox = document.getElementById("musicbox")
+    musicbox.innerHTML = ""
     let musicbtn = document.createElement('input')
     musicbtn.setAttribute("type", "file")
     musicbtn.setAttribute("accept", ".mp3")
     musicbox.appendChild(musicbtn)
-    musicbtn.onchange = function() {  
+    musicbtn.onchange = function () {
         if (musicbtn.files.length > 0) {
             let file = musicbtn.files[0]
             const reader = new FileReader()
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 const arrayBuffer = event.target.result
                 songCounter++
-                const song = {id: songCounter, name: file.name, data: arrayBuffer }
+                const song = { id: songCounter, name: file.name, data: arrayBuffer }
                 songList.push(song)
-                addSong(song) 
-                updateMusicList() 
+                addSong(song)
+                updateMusicList()
             }
             reader.readAsArrayBuffer(file)
-            musicbtn.value = '' 
+            musicbtn.value = ''
         }
     }
     musicbox.appendChild(musicbtn)
     let musicList = document.createElement('div')
     musicList.id = "musiclist"
     musicbox.appendChild(musicList)
-    openIndex() 
-    
+    openIndex()
+
 
 
     // config modifier
     let confbox = document.getElementById("confbox");
     confbox.innerHTML = "";
     let confmodifiers = getConfigModifiers();
-    Object.keys(confmodifiers).forEach(function(key) {
+    Object.keys(confmodifiers).forEach(function (key) {
         confmodifier = confmodifiers[key];
         let confkey = document.createElement('div');
         confkey.className = "confkey";
         confkey.id = "confkey_" + key;
         confkey.innerHTML = "ᐅ " + getL(key);
-        confkey.onclick = function() {
-            Object.keys(confmodifiers).forEach(function(otherkey) {
+        confkey.onclick = function () {
+            Object.keys(confmodifiers).forEach(function (otherkey) {
                 let tmpkey = document.getElementById("confkey_" + otherkey);
                 let tmpgroup = document.getElementById("confgroup_" + otherkey);
                 if (otherkey == key && tmpgroup.className == "w3-margin w3-hide") {
@@ -564,6 +582,8 @@ function createLayout() {
                         createLayout();
                     } else if (configitem['key'] == "TRACKING_MODE") {
                         setTrackingModeSelect(itemselect.value);
+                    } else if (configitem['key'] == "UI_THEME") {
+                        updateTheme();
                     }
                 };
                 confgroup.appendChild(itemselect);
@@ -574,7 +594,7 @@ function createLayout() {
                 let setrange = configitem['range'][1] - configitem['range'][0];
                 let setvalue = (getCMV(configitem['key']) - configitem['range'][0]) * 1000 / setrange;
                 item.setAttribute("value", setvalue);
-                item.onchange = function() {
+                item.onchange = function () {
                     let newvalue = item.value / 1000 * setrange + configitem['range'][0];
                     itemval.value = newvalue;
                     itemval.onchange();
@@ -583,11 +603,11 @@ function createLayout() {
                 itemval.style.textAlign = "right";
                 itemval.style.width = "100px";
                 itemval.value = getCMV(configitem['key']);
-                itemval.onchange = function() {
+                itemval.onchange = function () {
                     console.log(configitem['key'], itemval.value);
                     if (itemval.value < configitem['range'][0]) {
                         itemval.value = configitem['range'][0];
-                    } else if (itemval.value < configitem['range'][1]) {} else {
+                    } else if (itemval.value < configitem['range'][1]) { } else {
                         itemval.value = configitem['range'][1];
                     }
                     let newvalue = (itemval.value - configitem['range'][0]) * 1000 / setrange;
@@ -615,7 +635,7 @@ function createLayout() {
         loggroup.className = "w3-margin w3-hide";
         loggroup.id = "logbox_" + key;
         loggroup.style.color = "white";
-        logkey.onclick = function() {
+        logkey.onclick = function () {
             if (loggroup.className == "w3-margin w3-hide") {
                 logkey.innerHTML = "ᐁ " + getL(key);
                 loggroup.className = "w3-margin";
@@ -636,7 +656,7 @@ function createLayout() {
     let exportVRMRotateButton = document.createElement("input");
     exportVRMRotateButton.setAttribute("type", "button");
     exportVRMRotateButton.setAttribute("value", getL("Export Pose & Expression"));
-    exportVRMRotateButton.onclick = function() {
+    exportVRMRotateButton.onclick = function () {
         let exportJSON = {
             "metaVersion": getMetaVersion(),
             "rotate": exportRotate(),
@@ -649,7 +669,7 @@ function createLayout() {
         dlAnchorElem.click();
         dlAnchorElem.remove();
     }
-    extralogkey.onclick = function() {
+    extralogkey.onclick = function () {
         if (extraloggroup.className == "w3-margin w3-hide") {
             extralogkey.innerHTML = "ᐁ extra";
             extraloggroup.className = "w3-margin";
@@ -730,8 +750,8 @@ function createMoodLayout() {
         handobj.src = "asset/hand/" + trackingmode + "-2.png";
         handobj.style.width = "30px";
         handobj.style.cursor = "pointer";
-        handobj.style.marginLeft = "12px";
-        handobj.onclick = function() {
+        // handobj.style.marginLeft = "12px"; // REMOVED: Causes alignment issues
+        handobj.onclick = function () {
             if (getCMV("IN_TRACKING_MODE_SELECT") ||
                 !getCMV("UI_TRACKING_MODE_COLLAPSE")) {
                 setCMV("TRACKING_MODE", trackingmode);
@@ -743,8 +763,8 @@ function createMoodLayout() {
             }
         }
         handdiv.appendChild(handobj);
-        handdiv.appendChild(document.createElement("br"));
-        handdiv.appendChild(document.createElement("br"));
+        // handdiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
+        // handdiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
         posebar.appendChild(handdiv);
 
         if (i == availableTrackingMode.length - 1) {
@@ -767,8 +787,8 @@ function createMoodLayout() {
             moodobj.src = "asset/mood/" + mood + ".png";
             moodobj.style.width = "30px";
             moodobj.style.cursor = "pointer";
-            moodobj.style.marginLeft = "12px";
-            moodobj.onclick = function() {
+            // moodobj.style.marginLeft = "12px"; // REMOVED: Causes alignment issues
+            moodobj.onclick = function () {
                 if (getCMV("IN_MOOD_SELECT") ||
                     !getCMV("UI_MOOD_COLLAPSE")) {
                     setCMV("IN_MOOD_SELECT", false);
@@ -780,8 +800,8 @@ function createMoodLayout() {
                 }
             }
             mooddiv.appendChild(moodobj);
-            mooddiv.appendChild(document.createElement("br"));
-            mooddiv.appendChild(document.createElement("br"));
+            // mooddiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
+            // mooddiv.appendChild(document.createElement("br")); // REMOVED: Causes layout issues
             moodbar.appendChild(mooddiv);
         }
 
@@ -790,7 +810,7 @@ function createMoodLayout() {
         }
     }
 
-    moodbar.onmouseout = function(e) {
+    moodbar.onmouseout = function (e) {
         if (e.target && e.relatedTarget &&
             !(e.target.id[7] == "_" && e.relatedTarget.id[7] == "_" &&
                 e.target.id.slice(0, 4) == e.relatedTarget.id.slice(0, 4))) {
@@ -930,7 +950,7 @@ function drawLandmark(landmark) {
         } else {
             dbg.scale(getCMV('CANVAS_RATIO'), getCMV('CANVAS_RATIO'));
         }
-        Object.keys(landmark).forEach(function(key) {
+        Object.keys(landmark).forEach(function (key) {
             for (let i = 0; i < landmark[key].length; i++) {
                 let p = landmark[key][i];
                 dbg.fillStyle = MARKCOLOR[key];
@@ -951,7 +971,7 @@ function printLog(keys) {
                 let logbox = document.getElementById("logbox_" + ikey);
                 logbox.innerHTML = '';
                 if (keys[ikey]) {
-                    Object.keys(keys[ikey]).forEach(function(key) {
+                    Object.keys(keys[ikey]).forEach(function (key) {
                         let jsonItem = document.createElement('text');
                         jsonItem.innerHTML = getL(key) + ": " + Math.floor(keys[ikey][key] * 1000) / 1000 + "<br/>";
                         jsonItem.style.color = "white";
@@ -1029,7 +1049,7 @@ function drawSafari() {
     let tmp1 = document.createElement('button');
     tmp1.style.color = 'red';
     tmp1.innerHTML = getL("Enable OpenLive3D Safari Version!");
-    tmp1.onclick = function() {
+    tmp1.onclick = function () {
         console.log("Enable Safari Parameters!");
         setCMV("MULTI_THREAD", false);
         setCMV("TEST_SAFARI_ENTRY", true);
@@ -1103,5 +1123,17 @@ function displayObj(target) {
         obj.style.display = "block";
     } else {
         obj.style.display = "none";
+    }
+}
+
+function updateTheme() {
+    let theme = getCMV("UI_THEME");
+    let ghostkwebbTheme = document.getElementById("theme-ghostkwebb");
+    if (ghostkwebbTheme) {
+        if (theme === "Ghostkwebb") {
+            ghostkwebbTheme.disabled = false;
+        } else {
+            ghostkwebbTheme.disabled = true;
+        }
     }
 }
