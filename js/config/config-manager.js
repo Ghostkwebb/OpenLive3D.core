@@ -112,7 +112,7 @@ let defaultConfig = {
     'IN_TRACKING_MODE_SELECT': false,
     'TEST_MOBILE_ENTRY': false,
     'TEST_SAFARI_ENTRY': false,
-    'UI_THEME': "OpenLive3D"
+    'UI_THEME': "Ghostkwebb"
 };
 
 function getDefaultCMV(key) {
